@@ -1,0 +1,72 @@
+<?
+    // Set page title.
+    $this->headTitle($this->translate('Excerpt') . ': ' . $this->driver->getBreadcrumb());
+
+    $resource = $this->tab->getSummaryInfo();
+    $tree = $this->tab->makeRequestFor($resource->tree->ref);
+?>
+
+
+
+ <h4><b><span style='font-size: 1.1em'><?= $resource->title ?></span></b></h4>
+
+ <h5><b><span style='font-size: 1.1em'>Size:</span></b> <?= $resource->extents[0]->extent_type; ?></h5>
+
+ <h5><b><span style='font-size: 1.1em'>Call Number:</span></b> <?= $resource->id_0; ?></h5>
+ <br>
+
+<?
+ $notes = $resource->notes;
+ foreach($notes as $note) {
+
+    echo "<h4><b><span  style='font-size: 1.1em'>" . $this->translate($note->type). "</span></b></h4>";
+    if ($note->jsonmodel_type == "note_singlepart") {
+        $contentArray = $note->content;
+        foreach($contentArray as $noteContent) {
+           echo $noteContent;
+           echo "<br>";
+        }
+    }
+    else {
+        $subnotes = $note->subnotes;
+        foreach($subnotes as $subnote) {
+            echo $subnote->content;
+            echo "<br>";
+        }
+    }
+    echo "<br>";
+
+ }
+
+ $children = $tree->children;
+ foreach($children as $child) {
+    echo "<br>";
+    echo "<h4><b><span  style='font-size: 1.1em'>" . $child->title . "</span></b></h4>";
+    echo "<ul>";
+    foreach($child->children as $subchild) {
+        $containerInfo = $this->tab->makeRequestFor($subchild->record_uri);
+        echo "<li><b>" . $containerInfo->display_string . "</b></li>";
+        echo $containerInfo->instances[0]->container->type_1;
+        echo "&nbsp;&nbsp";
+        echo $containerInfo->instances[0]->container->indicator_1;
+        echo "&nbsp;&nbsp";
+        echo $containerInfo->instances[0]->container->type_2;
+        echo "&nbsp;&nbsp";
+        echo $containerInfo->instances[0]->container->indicator_2;
+        echo "<br>";
+
+        foreach($containerInfo->notes as $n) {
+            foreach($n->subnotes as $subn) {
+                echo $subn->content;
+                echo "<br>";
+            }
+        }
+        echo "<br>";
+
+    }
+    echo "</ul>";
+ }
+
+
+
+?>
